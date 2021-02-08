@@ -23,8 +23,18 @@ CREDITS
  Credits to Sean Barrett and his stb style libraries which inspired this library.
 */
 
+#ifdef DGL_STATIC
+#define DGL_DEF static
+#else
+#define DGL_DEF extern
+#endif
+
 #ifndef DGL_H
 #define DGL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //
 // Compilers and Platforms
@@ -47,6 +57,7 @@ CREDITS
 #define COMPILER_LLVM 1
 #endif
 #endif
+
 
 //
 // Useful defines
@@ -110,7 +121,7 @@ typedef size_t usize;
 // Safe Truncate
 //
 
-local_inline uint32
+inline uint32
 dgl_safe_truncate_uint32(uint64 value)
 {
     dgl_assert(value <= 0xFFFFFFFF, "Failed to safely truncate value");
@@ -118,7 +129,7 @@ dgl_safe_truncate_uint32(uint64 value)
     return(result);
 }
 
-local_inline int32
+inline int32
 dgl_safe_truncate_int32(int64 value)
 {
     dgl_assert(value <= 0xFFFFFFFF, "Failed to safely truncate value");
@@ -126,7 +137,7 @@ dgl_safe_truncate_int32(int64 value)
     return(result);
 }
 
-local_inline uint32
+inline uint32
 dgl_safe_size_to_uint32(usize value)
 {
     dgl_assert(value <= 0xFFFFFFFF, "Failed to safely truncate value");
@@ -134,7 +145,7 @@ dgl_safe_size_to_uint32(usize value)
     return(result);
 }
 
-local_inline int32
+inline int32
 dgl_safe_size_to_int32(usize value)
 {
     dgl_assert(value <= 0xFFFFFFFF, "Failed to safely truncate value");
@@ -168,42 +179,42 @@ dgl_round_real32_to_int32(real32 value)
 // But this is easier for now, to support different types.
 #if COMPILER_LLVM
 local_inline uint32
-dgl_atomic_compare_exchange_uint32(uint32 volatile *value, uint32 new, uint32 expected)
+dgl_atomic_compare_exchange_uint32(uint32 volatile *value, uint32 new_val, uint32 expected)
 {
-    uint32 result = __sync_val_compare_and_swap(value, expected, new);
+    uint32 result = __sync_val_compare_and_swap(value, expected, new_val);
     return(result);
 }
 local_inline int32
-dgl_atomic_compare_exchange_int32(int32 volatile *value, int32 new, int32 expected)
+dgl_atomic_compare_exchange_int32(int32 volatile *value, int32 new_val, int32 expected)
 {
-    int32 result = __sync_val_compare_and_swap(value, expected, new);
+    int32 result = __sync_val_compare_and_swap(value, expected, new_val);
     return(result);
 }
 local_inline uintptr
-dgl_atomic_compare_exchange_uintptr(uintptr volatile *value, uintptr new, uintptr expected)
+dgl_atomic_compare_exchange_uintptr(uintptr volatile *value, uintptr new_val, uintptr expected)
 {
-    uintptr result = __sync_val_compare_and_swap(value, expected, new);
+    uintptr result = __sync_val_compare_and_swap(value, expected, new_val);
     return(result);
 }
 // TODO(dgl): not tested
 #elif COMPILER_MSVC
 local_inline uint32
-dgl_atomic_compare_exchange_uint32(uint32 volatile *value, uint32 new, uint32 expected)
+dgl_atomic_compare_exchange_uint32(uint32 volatile *value, uint32 new_val, uint32 expected)
 {
-    uint32 result = _InterlockedCompareExchange((long *)value, new, expected);
+    uint32 result = _InterlockedCompareExchange((long *)value, new_val, expected);
 
     return(result);
 }
 local_inline int32
-dgl_atomic_compare_exchange_int32(int32 volatile *value, int32 new, int32 expected)
+dgl_atomic_compare_exchange_int32(int32 volatile *value, int32 new_val, int32 expected)
 {
-    int32 result = _InterlockedCompareExchange((long *)value, new, expected);
+    int32 result = _InterlockedCompareExchange((long *)value, new_val, expected);
     return(result);
 }
 local_inline uintptr
-dgl_atomic_compare_exchange_uintptr(uintptr volatile *value, uintptr new, uintptr expected)
+dgl_atomic_compare_exchange_uintptr(uintptr volatile *value, uintptr new_val, uintptr expected)
 {
-    uintptr result = _InterlockedCompareExchange(value, new, expected);
+    uintptr result = _InterlockedCompareExchange(value, new_val, expected);
     return(result);
 }
 #else
@@ -287,30 +298,34 @@ typedef struct DGL_Mem_Pool
     DGL_Mem_Pool_Free_Node *head;
 } DGL_Mem_Pool;
 
-internal void dgl_mem_arena_init(DGL_Mem_Arena *arena, uint8 *base, DGL_Mem_Index size);
+DGL_DEF void dgl_mem_arena_init(DGL_Mem_Arena *arena, uint8 *base, DGL_Mem_Index size);
 #define dgl_mem_arena_push_struct(arena, type) (type *)dgl_mem_arena_alloc_align(arena, sizeof(type), DEFAULT_ALIGNMENT)
 #define dgl_mem_arena_push_array(arena, type, count) (type *)dgl_mem_arena_alloc_align(arena, (count)*sizeof(type), DEFAULT_ALIGNMENT)
 #define dgl_mem_arena_push(arena, size) dgl_mem_arena_alloc_align(arena, size, DEFAULT_ALIGNMENT)
-internal void * dgl_mem_arena_alloc_align(DGL_Mem_Arena *arena, DGL_Mem_Index size, DGL_Mem_Index align);
+DGL_DEF void * dgl_mem_arena_alloc_align(DGL_Mem_Arena *arena, DGL_Mem_Index size, DGL_Mem_Index align);
 #define dgl_mem_arena_resize(arena, current_base, current_size, new_size) dgl_mem_arena_resize_align(arena, current_base, current_size, new_size, DEFAULT_ALIGNMENT)
-internal void * dgl_mem_arena_resize_align(DGL_Mem_Arena *arena, uint8 *current_base, DGL_Mem_Index current_size, DGL_Mem_Index new_size, usize align);
-internal DGL_Mem_Temp_Arena dgl_mem_arena_begin_temp(DGL_Mem_Arena *arena);
-internal void dgl_mem_arena_end_temp(DGL_Mem_Temp_Arena temp);
+DGL_DEF void * dgl_mem_arena_resize_align(DGL_Mem_Arena *arena, uint8 *current_base, DGL_Mem_Index current_size, DGL_Mem_Index new_size, usize align);
+DGL_DEF DGL_Mem_Temp_Arena dgl_mem_arena_begin_temp(DGL_Mem_Arena *arena);
+DGL_DEF void dgl_mem_arena_end_temp(DGL_Mem_Temp_Arena temp);
 
 #define dgl_mem_pool_init_struct(arena, base, size, type) dgl_mem_pool_init_align(arena, base, size, sizeof(type), DEFAULT_ALIGNMENT)
 #define dgl_mem_pool_init(arena, base, size, chunk_size) dgl_mem_pool_init_align(arena, base, size, chunk_size, DEFAULT_ALIGNMENT)
-internal void dgl_mem_pool_init_align(DGL_Mem_Pool *arena, uint8 *base, DGL_Mem_Index size, DGL_Mem_Index chunk_size, DGL_Mem_Index chunk_alignment);
-internal void dgl_mem_pool_free_all(DGL_Mem_Pool *arena);
+DGL_DEF void dgl_mem_pool_init_align(DGL_Mem_Pool *arena, uint8 *base, DGL_Mem_Index size, DGL_Mem_Index chunk_size, DGL_Mem_Index chunk_alignment);
+DGL_DEF void dgl_mem_pool_free_all(DGL_Mem_Pool *arena);
 #define dgl_mem_pool_push(arena, type) (type *)dgl__mem_pool_alloc_internal(arena)
-internal void * dgl__mem_pool_alloc_internal(DGL_Mem_Pool *arena);
+DGL_DEF void * dgl__mem_pool_alloc_internal(DGL_Mem_Pool *arena);
 #define dgl_mem_pool_release(arena, ptr) dgl__mem_pool_free_internal(arena)
-internal void dgl__mem_pool_free_internal(DGL_Mem_Pool *arena, void *ptr);
+DGL_DEF void dgl__mem_pool_free_internal(DGL_Mem_Pool *arena, void *ptr);
 #define dgl_mem_pool_push_threadsafe(arena, type) (type *)dgl__mem_pool_alloc_threadsafe_internal(arena)
-internal void * dgl__mem_pool_alloc_threadsafe_internal(DGL_Mem_Pool *arena);
+DGL_DEF void * dgl__mem_pool_alloc_threadsafe_internal(DGL_Mem_Pool *arena);
 #define dgl_mem_pool_release_threadsafe(arena, ptr) dgl__mem_pool_free_threadsafe_internal(arena, ptr)
-internal void dgl__mem_pool_free_threadsafe_internal(DGL_Mem_Pool *arena, void *ptr);
+DGL_DEF void dgl__mem_pool_free_threadsafe_internal(DGL_Mem_Pool *arena, void *ptr);
 
 #endif // DGL_NO_MEMORY
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // DGL_H
 
@@ -333,7 +348,7 @@ global struct DGL_Logger
     bool32 initialized;
 } dgl_logger;
 
-internal void
+DGL_DEF void
 dgl_log_init_threadsafe(dgl_time_in_ms_F time_func, dgl_lock_F lock_func)
 {
     dgl_logger.get_time = time_func;
@@ -341,20 +356,20 @@ dgl_log_init_threadsafe(dgl_time_in_ms_F time_func, dgl_lock_F lock_func)
     dgl_logger.initialized = true;
 }
 
-internal void
+DGL_DEF void
 dgl_log_init(dgl_time_in_ms_F time_func)
 {
     dgl_log_init_threadsafe(time_func, 0);
 }
 
 
-internal void
+DGL_DEF void
 dgl__lock()
 {
   if (dgl_logger.lock) { dgl_logger.lock(true); }
 }
 
-internal void
+DGL_DEF void
 dgl__unlock()
 {
     if (dgl_logger.lock) { dgl_logger.lock(false); }
@@ -409,7 +424,7 @@ dgl__log_internal(char *file, int32 line, char *fmt, ...)
 #endif
 
 #include <string.h>
-internal uintptr
+DGL_DEF uintptr
 dgl__align_forward_uintptr(uintptr base, usize align)
 {
     uintptr result = base;
@@ -426,7 +441,7 @@ dgl__align_forward_uintptr(uintptr base, usize align)
     return(result);
 }
 
-internal DGL_Mem_Index
+DGL_DEF DGL_Mem_Index
 dgl__align_forward_memory_index(DGL_Mem_Index size, usize align)
 {
     DGL_Mem_Index result = size;
@@ -452,7 +467,7 @@ dgl_mem_arena_init(DGL_Mem_Arena *arena, uint8 *base, DGL_Mem_Index size)
     arena->prev_offset = 0;
 }
 
-internal void *
+DGL_DEF void *
 dgl_mem_arena_alloc_align(DGL_Mem_Arena *arena, DGL_Mem_Index size, usize align)
 {
     uintptr curr_ptr = dgl_cast(uintptr)(arena->base + arena->curr_offset);
@@ -472,7 +487,7 @@ dgl_mem_arena_alloc_align(DGL_Mem_Arena *arena, DGL_Mem_Index size, usize align)
     return(result);
 }
 
-internal void *
+DGL_DEF void *
 dgl_mem_arena_resize_align(DGL_Mem_Arena *arena, uint8 *current_base, DGL_Mem_Index current_size, DGL_Mem_Index new_size, usize align)
 {
     void *result = 0;
@@ -506,7 +521,7 @@ dgl_mem_arena_resize_align(DGL_Mem_Arena *arena, uint8 *current_base, DGL_Mem_In
     return(result);
 }
 
-internal DGL_Mem_Temp_Arena
+DGL_DEF DGL_Mem_Temp_Arena
 dgl_mem_arena_begin_temp(DGL_Mem_Arena *arena)
 {
     DGL_Mem_Temp_Arena result;
@@ -516,14 +531,14 @@ dgl_mem_arena_begin_temp(DGL_Mem_Arena *arena)
     return(result);
 }
 
-internal void
+DGL_DEF void
 dgl_mem_arena_end_temp(DGL_Mem_Temp_Arena temp)
 {
     temp.arena->prev_offset = temp.prev_offset;
     temp.arena->curr_offset = temp.curr_offset;
 }
 
-internal void
+DGL_DEF void
 dgl_mem_pool_free_all(DGL_Mem_Pool *arena)
 {
     DGL_Mem_Index chunk_count = arena->size / arena->chunk_size;
@@ -538,7 +553,7 @@ dgl_mem_pool_free_all(DGL_Mem_Pool *arena)
     }
 }
 
-internal void
+DGL_DEF void
 dgl_mem_pool_init_align(DGL_Mem_Pool *arena, uint8 *base, DGL_Mem_Index size, DGL_Mem_Index chunk_size, usize chunk_alignment)
 {
     uintptr initial_base = (uintptr)base;
@@ -560,7 +575,7 @@ dgl_mem_pool_init_align(DGL_Mem_Pool *arena, uint8 *base, DGL_Mem_Index size, DG
     dgl_mem_pool_free_all(arena);
 }
 
-internal void *
+DGL_DEF void *
 dgl__mem_pool_alloc_internal(DGL_Mem_Pool *arena)
 {
     void *result = 0;
@@ -580,7 +595,7 @@ dgl__mem_pool_alloc_internal(DGL_Mem_Pool *arena)
     return(result);
 }
 
-internal void
+DGL_DEF void
 dgl__mem_pool_free_internal(DGL_Mem_Pool *arena, void *ptr)
 {
     dgl_assert((ptr >= dgl_cast(void *)arena->base) &&
@@ -591,7 +606,7 @@ dgl__mem_pool_free_internal(DGL_Mem_Pool *arena, void *ptr)
     arena->head = node;
 }
 
-internal void *
+DGL_DEF void *
 dgl__mem_pool_alloc_threadsafe_internal(DGL_Mem_Pool *arena)
 {
     void *result = 0;
@@ -624,7 +639,7 @@ dgl__mem_pool_alloc_threadsafe_internal(DGL_Mem_Pool *arena)
     return(result);
 }
 
-internal void
+DGL_DEF void
 dgl__mem_pool_free_threadsafe_internal(DGL_Mem_Pool *arena, void *ptr)
 {
     dgl_assert((ptr >= dgl_cast(void *)arena->base) &&
