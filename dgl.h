@@ -23,6 +23,11 @@ CREDITS
  Credits to Sean Barrett and his stb style libraries which inspired this library.
 */
 
+/*
+   TODOs:
+   - handle module deps if a module is disabled (e.g. memory depends on log)
+*/
+
 #ifdef DGL_STATIC
 #define DGL_DEF static
 #else
@@ -87,6 +92,10 @@ extern "C" {
 #else
 #define dgl_assert(cond, msg)
 #endif
+
+#define dgl_max(a,b) ((a) > (b) ? (a) : (b))
+#define dgl_min(a,b) ((a) < (b) ? (a) : (b))
+#define dgl_clamp(x,lo,hi) (dgl_min((hi), dgl_max((lo), (x))))
 
 //
 // Types
@@ -163,6 +172,7 @@ local_inline uint32
 dgl_round_real32_to_uint32(real32 value)
 {
     dgl_assert(value >= 0.0f, "Number must be positive");
+    // TODO(dgl): should we do the faster (uint32)value + 0.5f; ?
     uint32 result = (uint32)roundf(value);
     return(result);
 }
