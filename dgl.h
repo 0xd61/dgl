@@ -204,6 +204,7 @@ dgl_round_real32_to_int32(real32 value)
 // to be more flexible. We should change this in the future to be more consistent.
 // But this is easier for now, to support different types.
 #if COMPILER_LLVM
+
 local_inline uint32
 dgl_atomic_compare_exchange_uint32(uint32 volatile *value, uint32 new_val, uint32 expected)
 {
@@ -450,33 +451,39 @@ dgl__unlock()
 void
 dgl__log_internal(char *file, int32 line, char *fmt, ...)
 {
-    dgl_assert(dgl_logger.initialized, "Logger must be initialized");
-    dgl_assert(dgl_logger.get_time, "time_in_ms must be a valid function");
-    int64 milliseconds = dgl_logger.get_time();
-    int32 seconds = dgl_cast(int32)(milliseconds / 1000);
-    milliseconds = milliseconds % 1000;
-    int32 minutes = seconds / 60;
-    seconds = seconds % 60;
-    int32 hours = minutes / 60;
-    minutes = minutes % 60;
-
-    dgl__lock();
-    if(file)
+    if(dgl_logger.initialized)
     {
-        fprintf(stdout, "%02d:%02d:%02d.%04lld %s:%d: ", hours, minutes, seconds, milliseconds, file, line);
+       dgl_assert(dgl_logger.get_time, "time_in_ms must be a valid function");
+       int64 milliseconds = dgl_logger.get_time();
+       int32 seconds = dgl_cast(int32)(milliseconds / 1000);
+       milliseconds = milliseconds % 1000;
+       int32 minutes = seconds / 60;
+       seconds = seconds % 60;
+       int32 hours = minutes / 60;
+       minutes = minutes % 60;
+
+       dgl__lock();
+       if(file)
+       {
+           fprintf(stdout, "%02d:%02d:%02d.%04lld %s:%d: ", hours, minutes, seconds, milliseconds, file, line);
+       }
+       else
+       {
+           fprintf(stdout, "%02d:%02d:%02d.%04lld: ", hours, minutes, seconds, milliseconds);
+       }
+
+       va_list ap;
+       va_start(ap, fmt);
+       vfprintf(stdout, fmt, ap);
+       fprintf(stdout, "\n");
+       fflush(stdout);
+       va_end(ap);
+       dgl__unlock();
     }
     else
     {
-        fprintf(stdout, "%02d:%02d:%02d.%04lld: ", hours, minutes, seconds, milliseconds);
+       //fprintf(stdout, "Failed to write log at %s:%d (Logger must be initialized)\n", file, line);
     }
-
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stdout, fmt, ap);
-    fprintf(stdout, "\n");
-    fflush(stdout);
-    va_end(ap);
-    dgl__unlock();
 
 }
 
