@@ -45,6 +45,22 @@ extern "C" {
 // Compilers and Platforms
 //
 
+#if defined(_WIN32) || defined(_WIN64)
+	#ifndef DGL_OS_WINDOWS
+	#define DGL_OS_WINDOWS 1
+	#endif
+#elif defined(__APPLE__) && defined(__MACH__)
+	#ifndef DGL_OS_OSX
+	#define DGL_OS_OSX 1
+	#endif
+#elif defined(__unix__)
+	#ifndef DGL_OS_UNIX
+	#define DGL_OS_UNIX 1
+	#endif
+#else
+	#error This operating system is not supported
+#endif
+
 #ifndef COMPILER_MSVC
 #define COMPILER_MSVC 0
 #endif
