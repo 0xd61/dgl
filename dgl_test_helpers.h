@@ -52,30 +52,25 @@ CREDITS
 // Types
 //
 
-#define kilobytes(value) ((value)*1024LL)
-#define megabytes(value) (kilobytes(value)*1024LL)
-#define gigabytes(value) (megabytes(value)*1024LL)
-#define terabytes(value) (gigabytes(value)*1024LL)
-
-typedef unsigned char      uint8 ;
-typedef   signed char       int8 ;
-typedef unsigned short     uint16;
-typedef   signed short      int16;
-typedef unsigned int       uint32;
-typedef   signed int        int32;
-typedef unsigned long long uint64;
-typedef          long long  int64;
-typedef          float     real32;
-typedef          double    real64;
-typedef          int32     bool32;
+typedef unsigned char            dglth_uint8 ;
+typedef   signed char             dglth_int8 ;
+typedef unsigned short           dglth_uint16;
+typedef   signed short            dglth_int16;
+typedef unsigned int             dglth_uint32;
+typedef   signed int              dglth_int32;
+typedef unsigned long long       dglth_uint64;
+typedef          long long        dglth_int64;
+typedef          float           dglth_real32;
+typedef          double          dglth_real64;
+typedef          dglth_int32     dglth_bool32;
 #define true 1
 #define false 0
 
 // TODO(dgl): could we define a intptr without stdint.h?
 #include <stdint.h>
-typedef uintptr_t uintptr;
+typedef uintptr_t dglth_uintptr;
 #include <stddef.h>
-typedef size_t usize;
+typedef size_t dglth_usize;
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,10 +78,10 @@ extern "C" {
 
 static struct
 {
-    bool32 active_test_error;
+    dglth_bool32 active_test_error;
     char *active_test_name;
-    int32 test_count;
-    int32 error_count;
+    dglth_int32 test_count;
+    dglth_int32 error_count;
 #if DGL_OS_WINDOWS
     LARGE_INTEGER start_time;
     LARGE_INTEGER end_time;
@@ -94,7 +89,7 @@ static struct
     struct timespec start_time;
     struct timespec end_time;
 #endif
-    real32 total_time_in_ms;
+    dglth_real32 total_time_in_ms;
 } dgl__test_context;
 
 #if DGL_OS_WINDOWS
@@ -107,13 +102,13 @@ dgl__get_wall_clock(void)
     return(result);
 }
 
-DGL_DEF inline real32
+DGL_DEF inline dglth_real32
 dgl__get_ms_elapsed(LARGE_INTEGER start, LARGE_INTEGER end)
 {
     LARGE_INTEGER perf_count_frequency;
     QueryPerformanceFrequency(&perf_count_frequency);
-    real32 result = ((real32)(end.QuadPart - start.QuadPart) * 1e3f /
-                     (real32)perf_count_frequency.QuadPart);
+    dglth_real32 result = ((dglth_real32)(end.QuadPart - start.QuadPart) * 1e3f /
+                     (dglth_real32)perf_count_frequency.QuadPart);
     return(result);
 }
 #elif DGL_OS_UNIX
@@ -125,11 +120,11 @@ dgl__get_wall_clock()
     return(result);
 }
 
-DGL_DEF inline real32
+DGL_DEF inline dglth_real32
 dgl__get_ms_elapsed(struct timespec start, struct timespec end)
 {
-    real32 result = (real32)(end.tv_sec - start.tv_sec) +
-                    ((real32)(end.tv_nsec - start.tv_nsec) * 1e-6f);
+    dglth_real32 result = (dglth_real32)(end.tv_sec - start.tv_sec) +
+                    ((dglth_real32)(end.tv_nsec - start.tv_nsec) * 1e-6f);
     return(result);
 }
 #endif
@@ -148,19 +143,19 @@ dgl__get_ms_elapsed(struct timespec start, struct timespec end)
     } while (0)
 
 #define DGL_EXPECT(a, op, b, type, format) dgl__compare_type_full(type, format, a, op, b)
-#define DGL_EXPECT_uint8(a, op, b) dgl__compare_type_full(uint8, "0x%.2x", a, op, b)
-#define DGL_EXPECT_int8(a, op, b) dgl__compare_type_full(int8, "0x%.2x", a, op, b)
-#define DGL_EXPECT_uint16(a, op, b) dgl__compare_type_full(uint16, "%u", a, op, b)
-#define DGL_EXPECT_int16(a, op, b) dgl__compare_type_full(int16, "%d", a, op, b)
-#define DGL_EXPECT_uint32(a, op, b) dgl__compare_type_full(uint32, "%u", a, op, b)
-#define DGL_EXPECT_int32(a, op, b) dgl__compare_type_full(int32, "%d", a, op, b)
-#define DGL_EXPECT_uint64(a, op, b) dgl__compare_type_full(uint64, "%lu", a, op, b)
-#define DGL_EXPECT_int64(a, op, b) dgl__compare_type_full(int64, "%ld", a, op, b)
-#define DGL_EXPECT_real32(a, op, b) dgl__compare_type_full(real32, "%f", a, op, b)
-#define DGL_EXPECT_real64(a, op, b) dgl__compare_type_full(real64, "%lf", a, op, b)
-#define DGL_EXPECT_bool32(a, op, b) dgl__compare_type_full(bool32, "%d", a, op, b)
-#define DGL_EXPECT_usize(a, op, b) dgl__compare_type_full(usize, "%lu", a, op, b)
-#define DGL_EXPECT_ptr(a, op, b) dgl__compare_type_full(uintptr, "0x%lx", (uintptr)(a), op, (uintptr)(b))
+#define DGL_EXPECT_uint8(a, op, b) dgl__compare_type_full(dglth_uint8, "0x%.2x", a, op, b)
+#define DGL_EXPECT_int8(a, op, b) dgl__compare_type_full(dglth_int8, "0x%.2x", a, op, b)
+#define DGL_EXPECT_uint16(a, op, b) dgl__compare_type_full(dglth_uint16, "%u", a, op, b)
+#define DGL_EXPECT_int16(a, op, b) dgl__compare_type_full(dglth_int16, "%d", a, op, b)
+#define DGL_EXPECT_uint32(a, op, b) dgl__compare_type_full(dglth_uint32, "%u", a, op, b)
+#define DGL_EXPECT_int32(a, op, b) dgl__compare_type_full(dglth_int32, "%d", a, op, b)
+#define DGL_EXPECT_uint64(a, op, b) dgl__compare_type_full(dglth_uint64, "%lu", a, op, b)
+#define DGL_EXPECT_int64(a, op, b) dgl__compare_type_full(dglth_int64, "%ld", a, op, b)
+#define DGL_EXPECT_real32(a, op, b) dgl__compare_type_full(dglth_real32, "%f", a, op, b)
+#define DGL_EXPECT_real64(a, op, b) dgl__compare_type_full(dglth_real64, "%lf", a, op, b)
+#define DGL_EXPECT_bool32(a, op, b) dgl__compare_type_full(dglth_bool32, "%d", a, op, b)
+#define DGL_EXPECT_usize(a, op, b) dgl__compare_type_full(dglth_usize, "%lu", a, op, b)
+#define DGL_EXPECT_ptr(a, op, b) dgl__compare_type_full(dglth_uintptr, "0x%lx", (uintptr)(a), op, (uintptr)(b))
 // TODO(dgl): expect_array types
 
 #define DGL_BEGIN_TEST(name) do { \
@@ -176,12 +171,12 @@ dgl__get_ms_elapsed(struct timespec start, struct timespec end)
 #define DGL_END_TEST() do { \
         dgl__test_context.end_time = dgl__get_wall_clock(); \
         if(dgl__test_context.active_test_error) { dgl__test_context.error_count++; } \
-        real32 test_duration = dgl__get_ms_elapsed(dgl__test_context.start_time, dgl__test_context.end_time); \
+        dglth_real32 test_duration = dgl__get_ms_elapsed(dgl__test_context.start_time, dgl__test_context.end_time); \
         printf("\t(%f ms)\n", test_duration); \
         dgl__test_context.total_time_in_ms += test_duration; \
     } while(0)
 
-DGL_DEF inline bool32 dgl_test_result()
+DGL_DEF inline dglth_bool32 dgl_test_result()
 {
     printf("Executed %d test(s) in %f ms - Errors: %d\n", dgl__test_context.test_count, dgl__test_context.total_time_in_ms, dgl__test_context.error_count);
     return(dgl__test_context.error_count == 0);
