@@ -149,8 +149,8 @@ dgl__get_ms_elapsed(struct timespec start, struct timespec end)
 #define DGL_EXPECT_int16(a, op, b) dgl__compare_type_full(dglth_int16, "%d", a, op, b)
 #define DGL_EXPECT_uint32(a, op, b) dgl__compare_type_full(dglth_uint32, "%u", a, op, b)
 #define DGL_EXPECT_int32(a, op, b) dgl__compare_type_full(dglth_int32, "%d", a, op, b)
-#define DGL_EXPECT_uint64(a, op, b) dgl__compare_type_full(dglth_uint64, "%lu", a, op, b)
-#define DGL_EXPECT_int64(a, op, b) dgl__compare_type_full(dglth_int64, "%ld", a, op, b)
+#define DGL_EXPECT_uint64(a, op, b) dgl__compare_type_full(dglth_uint64, "%llu", a, op, b)
+#define DGL_EXPECT_int64(a, op, b) dgl__compare_type_full(dglth_int64, "%lld", a, op, b)
 #define DGL_EXPECT_real32(a, op, b) dgl__compare_type_full(dglth_real32, "%f", a, op, b)
 #define DGL_EXPECT_real64(a, op, b) dgl__compare_type_full(dglth_real64, "%lf", a, op, b)
 #define DGL_EXPECT_bool32(a, op, b) dgl__compare_type_full(dglth_bool32, "%d", a, op, b)
@@ -178,7 +178,7 @@ dgl__get_ms_elapsed(struct timespec start, struct timespec end)
 
 DGL_DEF inline dglth_bool32 dgl_test_result()
 {
-    printf("Executed %d test(s) in %f ms - Errors: %d\n", dgl__test_context.test_count, dgl__test_context.total_time_in_ms, dgl__test_context.error_count);
+    printf("Executed %d test(s) in %f ms - Errors: %d\n\n", dgl__test_context.test_count, dgl__test_context.total_time_in_ms, dgl__test_context.error_count);
     return(dgl__test_context.error_count == 0);
 }
 
