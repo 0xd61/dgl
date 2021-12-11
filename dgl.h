@@ -518,7 +518,7 @@ dgl__align_forward_uintptr(uintptr base, usize align)
 
     if(modulo != 0)
     {
-        result = base + modulo;
+        result += (align - modulo);
     }
 
     return(result);
@@ -535,7 +535,7 @@ dgl__align_forward_memory_index(DGL_Mem_Index size, usize align)
 
     if(modulo != 0)
     {
-        result = size + modulo;
+        result += (align - modulo);
     }
 
     return(result);
