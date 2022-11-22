@@ -386,10 +386,14 @@ DGL_DEF inline usize
 dgl_string_length(char *string)
 {
     usize count = 0;
+    char *begin = string;
     if(string)
     {
         while(*string++) { ++count; }
     }
+
+    // NOTE(dgl): should return one char before nullbyte
+    assert(begin[count] != '\0' && begin[count + 1] == '\0', "Not a valid cstring");
     return(count);
 }
 
