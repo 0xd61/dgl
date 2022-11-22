@@ -809,6 +809,7 @@ retry:
 DGL_DEF char *
 dgl_string_c_style(DGL_String_Builder *builder)
 {
+   // TODO(dgl): copy into memory and add nullbyte
    char *result = builder->string;
    return(result);
 }
